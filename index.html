@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Precificação Ação Júnior</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1e3a8a;--blue2:#2563eb;--blue-dark:#1e2d6b;
+  --gold:#f59e0b;--gold2:#d97706;
+  --green:#10b981;--red:#ef4444;--purple:#7c3aed;--purple2:#9333ea;
+  --bg:#f0f4f8;--card:#fff;--border:#e2e8f0;
+  --text:#1e293b;--muted:#64748b;
+  --sh:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06);
+  --sh2:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05)
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+header{background:linear-gradient(135deg,var(--blue-dark),var(--blue) 60%,var(--blue2));color:#fff;padding:1.25rem 2rem;box-shadow:var(--sh2);position:sticky;top:0;z-index:200}
+.hinner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem}
+.logo{display:flex;align-items:center;gap:.875rem}
+.logo-badge{width:46px;height:46px;background:var(--gold);border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;color:#fff;box-shadow:0 4px 14px rgba(245,158,11,.45);flex-shrink:0}
+.logo-text h1{font-size:1.35rem;font-weight:800;letter-spacing:-.3px}
+.logo-text p{font-size:.75rem;opacity:.75;margin-top:.1rem}
+.hbtns{display:flex;gap:.6rem;flex-wrap:wrap}
+
+main{max-width:1280px;margin:1.75rem auto;padding:0 1.5rem;display:grid;grid-template-columns:1fr 390px;gap:1.5rem}
+@media(max-width:980px){main{grid-template-columns:1fr}}
+.col-left,.col-right{display:flex;flex-direction:column;gap:1.5rem}
+
+.card{background:var(--card);border-radius:16px;padding:1.5rem;box-shadow:var(--sh);border:1px solid var(--border)}
+/* Card de configurações tem borda roxa */
+.card-settings{border-color:#ede9fe;background:#faf8ff}
+.ch{display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem;padding-bottom:.875rem;border-bottom:2px solid var(--bg)}
+.card-settings .ch{border-bottom-color:#ede9fe}
+.ci{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--blue2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;flex-shrink:0}
+.ci.green{background:linear-gradient(135deg,#059669,var(--green))}
+.ci.purple{background:linear-gradient(135deg,var(--purple),var(--purple2))}
+.ci.gold{background:linear-gradient(135deg,var(--gold2),var(--gold))}
+.ct{font-size:1rem;font-weight:700}
+.cs{font-size:.73rem;color:var(--muted);margin-top:.1rem}
+
+/* SCOPE */
+.scope-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:.75rem}
+.scope-opt{position:relative}
+.scope-opt input[type=checkbox]{position:absolute;opacity:0;width:0;height:0}
+.scope-lbl{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.45rem;padding:.875rem .6rem;border:2px solid var(--border);border-radius:12px;cursor:pointer;text-align:center;min-height:88px;transition:.2s;user-select:none}
+.scope-lbl:hover{border-color:var(--blue);background:#eff6ff}
+.scope-opt input:checked+.scope-lbl{border-color:var(--blue);background:linear-gradient(135deg,#eff6ff,#dbeafe);box-shadow:0 0 0 3px rgba(30,58,138,.14)}
+.scope-check{position:absolute;top:6px;right:6px;width:18px;height:18px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.7rem;opacity:0;transition:.2s}
+.scope-opt input:checked+.scope-lbl .scope-check{opacity:1}
+.scope-icon{font-size:1.5rem}
+.scope-name{font-size:.77rem;font-weight:600}
+
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:.875rem}
+.frow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:.875rem}
+.fg{display:flex;flex-direction:column;gap:.35rem}
+.flbl{font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+input[type=number],input[type=text],select{width:100%;padding:.575rem .8rem;border:2px solid var(--border);border-radius:10px;font-size:.875rem;color:var(--text);background:#fff;transition:border-color .2s}
+input:focus,select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(30,58,138,.1)}
+input[readonly]{background:var(--bg);color:var(--muted);cursor:default}
+input[readonly]:focus{border-color:var(--border);box-shadow:none}
+.suffix-row{display:flex;align-items:center;gap:.4rem}
+.suffix-row input{flex:1}
+.suffix-row span{font-size:.82rem;color:var(--muted);white-space:nowrap}
+
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.25rem}
+.scard{background:var(--bg);border-radius:12px;padding:.75rem;text-align:center}
+.sval{font-size:1.1rem;font-weight:800;color:var(--blue)}
+.slbl{font-size:.72rem;color:var(--muted);margin-top:.2rem}
+
+/* SETTINGS BOX (inside card) */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:.875rem}
+.settings-calc{background:linear-gradient(135deg,#ede9fe,#f5f3ff);border-radius:12px;padding:.875rem;margin-top:.75rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+.calc-formula{font-size:.78rem;color:var(--purple);opacity:.85}
+.calc-result{font-size:1.1rem;font-weight:800;color:var(--purple)}
+.calc-label{font-size:.7rem;color:var(--purple);opacity:.7;margin-top:.1rem}
+
+/* CALENDAR */
+.cal-head{display:grid;grid-template-columns:36px 1fr 145px 50px 58px 34px;gap:.3rem;padding:.4rem .55rem;background:var(--bg);border-radius:8px;margin-bottom:.4rem;font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase}
+.cal-row{display:grid;grid-template-columns:36px 1fr 145px 50px 58px 34px;gap:.3rem;align-items:center;padding:.38rem .55rem;border:1.5px solid var(--border);border-radius:10px;margin-bottom:.3rem;background:#fff;transition:.15s}
+.cal-row:hover{border-color:var(--blue);background:#fafcff}
+.wnum{font-weight:800;color:var(--blue);font-size:.85rem;text-align:center}
+.whrs{text-align:center;font-weight:700;font-size:.78rem;color:var(--blue)}
+.whrs.has-holiday{color:var(--gold2)}
+.psel{border:2px solid var(--border);border-radius:8px;padding:.28rem .38rem;font-size:.75rem;cursor:pointer;background:#fff;width:100%}
+.psel:focus{outline:none}
+.psel.pequeno{border-color:#fca5a5;background:#fff5f5;color:#dc2626}
+.psel.medio{border-color:#fcd34d;background:#fffbeb;color:#d97706}
+.psel.alto{border-color:#6ee7b7;background:#f0fdf4;color:#059669}
+.psel.altissimo{border-color:#93c5fd;background:#eff6ff;color:#1d4ed8}
+.holiday-input{width:100%;padding:.28rem .35rem;border:1.5px solid var(--border);border-radius:8px;font-size:.78rem;text-align:center}
+.holiday-input:focus{outline:none;border-color:var(--gold2)}
+
+/* INDIRECT INFO BOX */
+.indirect-info{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:12px;padding:1rem;border:1.5px solid #bbf7d0}
+.indirect-row{display:flex;justify-content:space-between;align-items:center;font-size:.83rem;padding:.2rem 0}
+.indirect-row .lbl{color:var(--muted)}
+.indirect-row .val{font-weight:700;color:#065f46}
+.indirect-row.total .lbl{font-weight:700;color:#065f46;font-size:.88rem}
+.indirect-row.total .val{font-size:1rem;color:#059669}
+.indirect-sep{border:none;border-top:1.5px solid #bbf7d0;margin:.4rem 0}
+
+/* COSTS */
+.cost-row{display:grid;grid-template-columns:1fr 125px 34px;gap:.35rem;align-items:center;margin-bottom:.4rem}
+.cost-prefix{position:relative}
+.cost-prefix::before{content:'R$';position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:.75rem;color:var(--muted);pointer-events:none;z-index:1}
+.cost-prefix input{padding-left:28px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;padding:.55rem 1.1rem;border:none;border-radius:10px;font-size:.82rem;font-weight:700;cursor:pointer;transition:.2s;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;box-shadow:0 4px 12px rgba(30,58,138,.3)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(30,58,138,.4)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;box-shadow:0 4px 12px rgba(245,158,11,.35)}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(245,158,11,.45)}
+.btn-green{background:linear-gradient(135deg,#059669,var(--green));color:#fff;box-shadow:0 4px 12px rgba(16,185,129,.3)}
+.btn-green:hover{transform:translateY(-1px)}
+.btn-purple{background:linear-gradient(135deg,var(--purple),var(--purple2));color:#fff;box-shadow:0 4px 12px rgba(124,58,237,.3)}
+.btn-purple:hover{transform:translateY(-1px)}
+.btn-outline{background:#fff;color:var(--blue);border:2px solid var(--blue)}
+.btn-outline:hover{background:#eff6ff}
+.btn-outline-w{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.45)}
+.btn-outline-w:hover{background:rgba(255,255,255,.1)}
+.btn-danger{background:#fef2f2;color:var(--red);border:1.5px solid #fecaca;padding:.3rem .5rem}
+.btn-danger:hover{background:#fee2e2}
+.btn-sm{padding:.4rem .875rem;font-size:.78rem}
+.add-row{display:flex;justify-content:flex-end;margin-top:.75rem}
+
+.empty{text-align:center;color:var(--muted);font-size:.82rem;padding:.875rem;background:var(--bg);border-radius:10px;border:2px dashed var(--border)}
+
+/* PRICING BOX */
+.price-box{background:linear-gradient(135deg,var(--blue-dark),var(--blue));border-radius:14px;color:#fff;padding:1.375rem;margin-bottom:1rem}
+.price-top{text-align:center;padding-bottom:.875rem;border-bottom:1px solid rgba(255,255,255,.18);margin-bottom:.875rem}
+.plbl{font-size:.72rem;opacity:.8;text-transform:uppercase;letter-spacing:.8px}
+.pval{font-size:2.1rem;font-weight:800;color:var(--gold);line-height:1.1;margin:.25rem 0}
+.pnote{font-size:.72rem;opacity:.65}
+.bdown{display:flex;flex-direction:column;gap:.35rem}
+.bi{display:flex;justify-content:space-between;font-size:.82rem}
+.bi .lbl{opacity:.85}
+.bi.sep{border-top:1px solid rgba(255,255,255,.12);padding-top:.35rem}
+.bi.ttl{font-weight:800;font-size:.92rem;padding-top:.5rem;border-top:1.5px solid rgba(255,255,255,.25);color:var(--gold)}
+
+.disc-row{display:flex;gap:.5rem;align-items:center;margin-top:.35rem}
+.disc-row input{max-width:85px}
+.final-box{margin-top:.5rem;padding:.5rem .75rem;background:#f0fdf4;border-radius:10px;display:none}
+
+.inst-rate-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem;flex-wrap:wrap}
+.inst-rate-row input{max-width:75px}
+.inst-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem}
+.icard{border:2px solid var(--border);border-radius:10px;padding:.5rem .3rem;text-align:center;cursor:pointer;transition:.2s}
+.icard:hover,.icard.active{border-color:var(--blue);background:#eff6ff}
+.inum{font-size:1rem;font-weight:800;color:var(--blue)}
+.ilbl{font-size:.63rem;color:var(--muted)}
+.ival{font-size:.75rem;font-weight:600;color:var(--text);margin-top:.1rem}
+.itot{font-size:.6rem;color:var(--muted)}
+
+.sp-item{display:flex;align-items:center;justify-content:space-between;padding:.55rem .7rem;border:1.5px solid var(--border);border-radius:10px;margin-bottom:.4rem;cursor:pointer;transition:.15s}
+.sp-item:hover{border-color:var(--blue);background:#eff6ff}
+.sp-name{font-size:.83rem;font-weight:700}
+.sp-meta{font-size:.7rem;color:var(--muted);margin-top:.1rem}
+
+.ref-box{margin-top:1rem;padding:.65rem .875rem;background:#f8fafc;border-radius:10px;font-size:.74rem;color:var(--muted);line-height:1.9}
+
+.toast{position:fixed;bottom:1.75rem;right:1.75rem;background:#1e293b;color:#fff;padding:.65rem 1.1rem;border-radius:12px;font-size:.83rem;box-shadow:var(--sh2);z-index:999;transform:translateY(80px);opacity:0;transition:.3s ease}
+.toast.show{transform:translateY(0);opacity:1}
+.sec-lbl{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;display:block}
+.badge-saved{display:inline-flex;align-items:center;gap:.3rem;font-size:.68rem;background:#dcfce7;color:#065f46;padding:.2rem .55rem;border-radius:20px;font-weight:700;margin-left:.5rem}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hinner">
+    <div class="logo">
+      <div class="logo-badge">AJ</div>
+      <div class="logo-text">
+        <h1>Precificação Ação Júnior</h1>
+        <p>Sistema de Precificação de Projetos</p>
+      </div>
+    </div>
+    <div class="hbtns">
+      <button class="btn btn-purple" onclick="exportCSV()">📊 Exportar Planilha</button>
+      <button class="btn btn-outline-w" onclick="saveProject()">💾 Salvar Projeto</button>
+      <button class="btn btn-gold" onclick="generatePDF()">📄 Gerar PDF</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="col-left">
+
+    <!-- ⚙️ CONFIGURAÇÕES DA EMPRESA -->
+    <div class="card card-settings">
+      <div class="ch">
+        <div class="ci purple">⚙️</div>
+        <div>
+          <div class="ct" style="color:var(--purple)">Configurações da Empresa</div>
+          <div class="cs">Valores fixos — salvos globalmente no sistema <span id="settingsSavedBadge" class="badge-saved" style="display:none">✓ Salvo</span></div>
+        </div>
+      </div>
+
+      <div class="settings-grid">
+        <div class="fg">
+          <label class="flbl">Valor Hora Consultoria (R$)</label>
+          <input type="number" id="cfgHourRate" min="0" step="0.01" value="15" oninput="saveSettings();calculate()">
+        </div>
+        <div class="fg">
+          <label class="flbl">ISS (%)</label>
+          <div class="suffix-row">
+            <input type="number" id="cfgISS" min="2" max="5" step="0.1" value="5" oninput="saveSettings();calculate()">
+            <span>% fixo (LC 116/2003)</span>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="flbl">Planejamento Orçamentário (R$)</label>
+          <input type="number" id="cfgOrcamento" min="0" step="100" value="50000" oninput="saveSettings();calculate()">
+        </div>
+        <div class="fg">
+          <label class="flbl">Dias Médio por Consultoria</label>
+          <input type="number" id="cfgDiasMedio" min="1" step="1" value="40" oninput="saveSettings();calculate()">
+        </div>
+        <div class="fg">
+          <label class="flbl">Meta de Consultorias / Ano</label>
+          <input type="number" id="cfgMeta" min="1" step="1" value="15" oninput="saveSettings();calculate()">
+        </div>
+        <div class="fg">
+          <label class="flbl">Despesa / Dia de Consultoria</label>
+          <input type="text" id="cfgDespesiaDia" readonly placeholder="Calculado automaticamente">
+        </div>
+      </div>
+
+      <div class="settings-calc">
+        <div>
+          <div class="calc-formula" id="cfgFormula">R$ 50.000 ÷ (40 dias × 15 projetos)</div>
+          <div class="calc-label">= Despesa por dia de consultoria</div>
+        </div>
+        <div style="text-align:right">
+          <div class="calc-result" id="cfgResultDisplay">R$ 83,33/dia</div>
+          <div class="calc-label">aplicado ao calendário</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Informações do Projeto -->
+    <div class="card">
+      <div class="ch"><div class="ci">📋</div><div><div class="ct">Informações do Projeto</div><div class="cs">Identifique o projeto</div></div></div>
+      <div class="fg">
+        <label class="flbl">Nome do Projeto</label>
+        <input type="text" id="projectName" placeholder="Ex: Consultoria Empresa XYZ" oninput="autoSave()">
+      </div>
+    </div>
+
+    <!-- Escopo — múltipla escolha -->
+    <div class="card">
+      <div class="ch"><div class="ci">🎯</div><div><div class="ct">Escopo do Projeto</div><div class="cs">Selecione uma ou mais áreas de atuação</div></div></div>
+      <div class="scope-grid">
+        <div class="scope-opt">
+          <input type="checkbox" id="s1" value="Estruturação Comercial" onchange="autoSave();calculate()">
+          <label for="s1" class="scope-lbl"><span class="scope-check">✓</span><span class="scope-icon">🏢</span><span class="scope-name">Estruturação Comercial</span></label>
+        </div>
+        <div class="scope-opt">
+          <input type="checkbox" id="s2" value="Pesquisa de Mercado" onchange="autoSave();calculate()">
+          <label for="s2" class="scope-lbl"><span class="scope-check">✓</span><span class="scope-icon">📊</span><span class="scope-name">Pesquisa de Mercado</span></label>
+        </div>
+        <div class="scope-opt">
+          <input type="checkbox" id="s3" value="Gestão de Pessoas" onchange="autoSave();calculate()">
+          <label for="s3" class="scope-lbl"><span class="scope-check">✓</span><span class="scope-icon">👥</span><span class="scope-name">Gestão de Pessoas</span></label>
+        </div>
+        <div class="scope-opt">
+          <input type="checkbox" id="s4" value="Gestão Financeira" onchange="autoSave();calculate()">
+          <label for="s4" class="scope-lbl"><span class="scope-check">✓</span><span class="scope-icon">💰</span><span class="scope-name">Gestão Financeira</span></label>
+        </div>
+        <div class="scope-opt">
+          <input type="checkbox" id="s5" value="Plano de Negócio" onchange="autoSave();calculate()">
+          <label for="s5" class="scope-lbl"><span class="scope-check">✓</span><span class="scope-icon">📝</span><span class="scope-name">Plano de Negócio</span></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Equipe -->
+    <div class="card">
+      <div class="ch"><div class="ci">👤</div><div><div class="ct">Configuração da Equipe</div><div class="cs">Número de consultores no projeto</div></div></div>
+      <div class="frow">
+        <div class="fg">
+          <label class="flbl">Nº de Membros</label>
+          <input type="number" id="numEmp" min="1" value="1" oninput="autoSave();calculate()">
+        </div>
+        <div class="fg">
+          <label class="flbl">Valor Hora (Configurações)</label>
+          <input type="text" id="displayHourRate" readonly placeholder="R$ 15,00">
+        </div>
+      </div>
+      <div class="stats">
+        <div class="scard"><div class="sval" id="stHours">0h</div><div class="slbl">Total de Horas Produtivas</div></div>
+        <div class="scard"><div class="sval" id="stLabor">R$ 0,00</div><div class="slbl">Custo de Mão de Obra</div></div>
+      </div>
+    </div>
+
+    <!-- Margem de Lucro -->
+    <div class="card">
+      <div class="ch"><div class="ci gold">📈</div><div><div class="ct">Margem de Lucro</div><div class="cs">Percentual de lucro sobre o custo total</div></div></div>
+      <div class="fg">
+        <label class="flbl">Taxa de Lucro (%)</label>
+        <div class="suffix-row">
+          <input type="number" id="profitRate" min="0" max="500" step="0.5" value="30" oninput="autoSave();calculate()">
+          <span>% aplicado sobre o subtotal</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendário -->
+    <div class="card">
+      <div class="ch"><div class="ci">📅</div><div><div class="ct">Calendário do Projeto</div><div class="cs">Semanas, rendimento e feriados</div></div></div>
+      <div class="cal-head">
+        <span style="text-align:center">#</span>
+        <span>Descrição / Período</span>
+        <span>Rendimento</span>
+        <span style="text-align:center">Fer.</span>
+        <span style="text-align:center">Horas</span>
+        <span></span>
+      </div>
+      <div id="calBody"></div>
+      <div class="add-row">
+        <button class="btn btn-outline btn-sm" onclick="addWeek()">+ Adicionar Semana</button>
+      </div>
+      <div class="ref-box">
+        <strong>Rendimento por Consultor/Semana:</strong><br>
+        🔴 Pequeno = 5h &nbsp;|&nbsp; 🟡 Médio = 10h &nbsp;|&nbsp; 🟢 Alto = 15h &nbsp;|&nbsp; 🔵 Altíssimo = 20h<br>
+        <span style="color:var(--gold2)">⚠ Fer.:</span> dias não trabalhados na semana (0–4). Horas e despesas indiretas são descontadas proporcionalmente.
+      </div>
+    </div>
+
+    <!-- Despesas Indiretas (calculadas automaticamente) -->
+    <div class="card">
+      <div class="ch"><div class="ci green">🏛️</div><div><div class="ct">Despesas Indiretas</div><div class="cs">Calculadas automaticamente via Configurações</div></div></div>
+      <div class="indirect-info" id="indirectInfo">
+        <div class="indirect-row"><span class="lbl">Despesa / Dia de Consultoria</span><span class="val" id="indDespesiaDia">R$ 83,33</span></div>
+        <div class="indirect-row"><span class="lbl">Dias trabalhados no projeto</span><span class="val" id="indDias">0 dias</span></div>
+        <hr class="indirect-sep">
+        <div class="indirect-row total"><span class="lbl">Total Despesas Indiretas</span><span class="val" id="indTotal">R$ 0,00</span></div>
+      </div>
+      <p style="font-size:.72rem;color:var(--muted);margin-top:.75rem">Baseado em: Orçamento ÷ (Dias Médio × Meta de Consultorias). Altere os valores em <strong>Configurações da Empresa</strong>.</p>
+    </div>
+
+    <!-- Custos Diretos -->
+    <div class="card">
+      <div class="ch"><div class="ci">💳</div><div><div class="ct">Custos Diretos</div><div class="cs">Despesas ligadas diretamente a este projeto</div></div></div>
+      <p style="font-size:.74rem;color:var(--muted);margin-bottom:.75rem">Ex: Impressões, transporte, pesquisa de campo, software específico.</p>
+      <div id="directBody"></div>
+      <div class="add-row">
+        <button class="btn btn-outline btn-sm" onclick="addDirect()">+ Adicionar Custo Direto</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- COLUNA DIREITA -->
+  <div class="col-right">
+
+    <div class="card">
+      <div class="ch"><div class="ci">💵</div><div><div class="ct">Precificação do Projeto</div><div class="cs">Resultado calculado em tempo real</div></div></div>
+
+      <div class="price-box">
+        <div class="price-top">
+          <div class="plbl">Valor à Vista</div>
+          <div class="pval" id="pMain">R$ 0,00</div>
+          <div class="pnote" id="pName">—</div>
+        </div>
+        <div class="bdown">
+          <div class="bi"><span class="lbl">Mão de Obra</span><span id="bdLabor">R$ 0,00</span></div>
+          <div class="bi"><span class="lbl">Despesas Indiretas</span><span id="bdIndirect">R$ 0,00</span></div>
+          <div class="bi"><span class="lbl">Custos Diretos</span><span id="bdDirect">R$ 0,00</span></div>
+          <div class="bi sep"><span class="lbl">Subtotal (Custo)</span><span id="bdSub">R$ 0,00</span></div>
+          <div class="bi"><span class="lbl" id="bdProfitLbl">Lucro (30%)</span><span id="bdProfit">R$ 0,00</span></div>
+          <div class="bi"><span class="lbl" id="bdISSLbl">ISS (5%)</span><span id="bdISS">R$ 0,00</span></div>
+          <div class="bi ttl"><span>TOTAL À VISTA</span><span id="bdTotal">R$ 0,00</span></div>
+        </div>
+      </div>
+
+      <span class="sec-lbl">Desconto</span>
+      <div class="disc-row">
+        <input type="number" id="discPct" min="0" max="100" step="0.5" value="0" placeholder="0" oninput="autoSave();calculate()">
+        <span style="font-size:.82rem;color:var(--muted)">%  =</span>
+        <span id="discVal" style="font-size:.88rem;font-weight:700;color:var(--red)">R$ 0,00</span>
+      </div>
+      <div class="final-box" id="finalBox">
+        <span style="font-size:.83rem;font-weight:700;color:#059669">Preço final c/ desconto: </span>
+        <span id="finalVal" style="font-size:.98rem;font-weight:800;color:#059669">R$ 0,00</span>
+      </div>
+
+      <div style="margin-top:1rem">
+        <span class="sec-lbl">Parcelamento</span>
+        <div class="inst-rate-row">
+          <span style="font-size:.77rem;color:var(--muted)">Juros mensais:</span>
+          <input type="number" id="installRate" min="0" max="10" step="0.1" value="0" oninput="autoSave();calculate()">
+          <span style="font-size:.77rem;color:var(--muted)">% a.m. <span style="opacity:.6">(0 = sem juros)</span></span>
+        </div>
+        <div class="inst-grid" id="instGrid"></div>
+      </div>
+
+      <div style="display:flex;gap:.5rem;margin-top:1rem">
+        <button class="btn btn-gold" style="flex:1;padding:.7rem" onclick="generatePDF()">📄 Gerar PDF</button>
+        <button class="btn btn-green" style="flex:1;padding:.7rem" onclick="exportCSV()">📊 Planilha</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch"><div class="ci">🗂️</div><div><div class="ct">Projetos Salvos</div><div class="cs">Memória de projetos anteriores</div></div></div>
+      <div id="savedList"><div class="empty">Nenhum projeto salvo ainda</div></div>
+      <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.75rem">
+        <button class="btn btn-outline btn-sm" onclick="newProject()">+ Novo</button>
+        <button class="btn btn-primary btn-sm" onclick="saveProject()">💾 Salvar Atual</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// CONFIGURAÇÕES GLOBAIS DA EMPRESA
+// ─────────────────────────────────────────────
+let settings = {
+  hourRate: 15,
+  issRate: 5,
+  orcamento: 50000,
+  diasMedio: 40,
+  metaConsultorias: 15
+};
+
+// ESTADO DO PROJETO
+let state = {
+  projectName:'', scopes:[], numEmp:1, profitRate:30,
+  weeks:[], directCosts:[], discPct:0, installRate:0
+};
+
+const PROD = { pequeno:5, medio:10, alto:15, altissimo:20 };
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+window.onload = function(){
+  loadSettings();
+  loadStorage();
+  renderCalendar();
+  renderDirect();
+  renderSaved();
+  calculate();
+};
+
+// ─────────────────────────────────────────────
+// CONFIGURAÇÕES — salvas separadamente
+// ─────────────────────────────────────────────
+function saveSettings(){
+  settings.hourRate      = parseFloat(gv('cfgHourRate'))      || 15;
+  settings.issRate       = parseFloat(gv('cfgISS'))           || 5;
+  settings.orcamento     = parseFloat(gv('cfgOrcamento'))     || 50000;
+  settings.diasMedio     = parseFloat(gv('cfgDiasMedio'))     || 40;
+  settings.metaConsultorias = parseFloat(gv('cfgMeta'))       || 15;
+  ls('aj_settings', settings);
+  updateSettingsUI();
+  // badge confirmação
+  const badge = document.getElementById('settingsSavedBadge');
+  badge.style.display = 'inline-flex';
+  clearTimeout(window._settingsBadgeTimer);
+  window._settingsBadgeTimer = setTimeout(() => badge.style.display = 'none', 2500);
+}
+
+function loadSettings(){
+  const s = lsGet('aj_settings', null);
+  if(s) settings = { ...settings, ...s };
+  setField('cfgHourRate', settings.hourRate);
+  setField('cfgISS', settings.issRate);
+  setField('cfgOrcamento', settings.orcamento);
+  setField('cfgDiasMedio', settings.diasMedio);
+  setField('cfgMeta', settings.metaConsultorias);
+  updateSettingsUI();
+}
+
+function updateSettingsUI(){
+  const d = despesiaDia();
+  setField('cfgDespesiaDia', fmt(d) + '/dia');
+  setField('displayHourRate', fmt(settings.hourRate) + '/h');
+  const o = settings.orcamento, dm = settings.diasMedio, m = settings.metaConsultorias;
+  document.getElementById('cfgFormula').textContent =
+    fmt(o) + ' ÷ (' + dm + ' dias × ' + m + ' projetos)';
+  document.getElementById('cfgResultDisplay').textContent = fmt(d) + '/dia';
+}
+
+function despesiaDia(){
+  const d = settings.diasMedio * settings.metaConsultorias;
+  return d > 0 ? settings.orcamento / d : 0;
+}
+
+// ─────────────────────────────────────────────
+// STORAGE DO PROJETO
+// ─────────────────────────────────────────────
+function autoSave(){ syncDOM(); ls('aj_cur', state); }
+
+function saveProject(){
+  syncDOM();
+  if(!state.projectName.trim()){ toast('⚠️ Defina o nome do projeto antes de salvar!'); return; }
+  const all = lsGet('aj_proj', []);
+  const i = all.findIndex(p => p.projectName === state.projectName);
+  const obj = { ...state, savedAt: new Date().toLocaleDateString('pt-BR') };
+  i >= 0 ? all[i] = obj : all.push(obj);
+  ls('aj_proj', all);
+  renderSaved();
+  toast('✅ Projeto salvo!');
+}
+
+function loadStorage(){
+  const cur = lsGet('aj_cur', null);
+  if(!cur) return;
+  state = { ...state, ...cur };
+  setField('projectName', state.projectName||'');
+  setField('numEmp', state.numEmp||1);
+  setField('profitRate', state.profitRate??30);
+  setField('discPct', state.discPct||0);
+  setField('installRate', state.installRate||0);
+  const scopes = state.scopes || [];
+  document.querySelectorAll('.scope-opt input[type=checkbox]').forEach(cb => {
+    cb.checked = scopes.includes(cb.value);
+  });
+}
+
+function loadProject(name){
+  const p = lsGet('aj_proj',[]).find(x => x.projectName === name);
+  if(!p) return;
+  state = { ...state, ...p };
+  setField('projectName', state.projectName||'');
+  setField('numEmp', state.numEmp||1);
+  setField('profitRate', state.profitRate??30);
+  setField('discPct', state.discPct||0);
+  setField('installRate', state.installRate||0);
+  const scopes = state.scopes||[];
+  document.querySelectorAll('.scope-opt input[type=checkbox]').forEach(cb => {
+    cb.checked = scopes.includes(cb.value);
+  });
+  renderCalendar(); renderDirect(); calculate();
+  toast('📂 Projeto "'+name+'" carregado!');
+}
+
+function deleteProject(name, e){
+  e.stopPropagation();
+  if(!confirm('Remover "'+name+'"?')) return;
+  const all = lsGet('aj_proj',[]).filter(p => p.projectName !== name);
+  ls('aj_proj', all);
+  renderSaved();
+  toast('🗑️ Removido.');
+}
+
+function newProject(){
+  if(!confirm('Iniciar novo projeto? Dados não salvos serão perdidos.')) return;
+  state = { projectName:'', scopes:[], numEmp:1, profitRate:30, weeks:[], directCosts:[], discPct:0, installRate:0 };
+  setField('projectName',''); setField('numEmp',1); setField('profitRate',30);
+  setField('discPct',0); setField('installRate',0);
+  document.querySelectorAll('.scope-opt input[type=checkbox]').forEach(cb => cb.checked = false);
+  renderCalendar(); renderDirect(); calculate();
+  toast('📋 Novo projeto iniciado!');
+}
+
+// ─────────────────────────────────────────────
+// SYNC DOM → STATE
+// ─────────────────────────────────────────────
+function syncDOM(){
+  state.projectName = gv('projectName');
+  state.numEmp      = parseInt(gv('numEmp'))||1;
+  state.profitRate  = parseFloat(gv('profitRate'))||0;
+  state.discPct     = parseFloat(gv('discPct'))||0;
+  state.installRate = parseFloat(gv('installRate'))||0;
+  state.scopes = [];
+  document.querySelectorAll('.scope-opt input[type=checkbox]:checked').forEach(cb => state.scopes.push(cb.value));
+  state.weeks = state.weeks.map(w => {
+    const ne=document.getElementById('wn-'+w.id), pe=document.getElementById('wp-'+w.id), he=document.getElementById('wh-'+w.id);
+    if(ne) w.name = ne.value;
+    if(pe) w.prod = pe.value;
+    if(he) w.holidays = Math.min(4, Math.max(0, parseInt(he.value)||0));
+    return w;
+  });
+  state.directCosts = state.directCosts.map(c => {
+    const ne=document.getElementById('cn-'+c.id), ve=document.getElementById('cv-'+c.id);
+    if(ne) c.name = ne.value;
+    if(ve) c.value = parseFloat(ve.value)||0;
+    return c;
+  });
+}
+
+// ─────────────────────────────────────────────
+// CALENDÁRIO
+// ─────────────────────────────────────────────
+function addWeek(){
+  state.weeks.push({id:Date.now(), name:'Semana '+(state.weeks.length+1), prod:'medio', holidays:0});
+  renderCalendar(); calculate(); autoSave();
+}
+function removeWeek(id){
+  state.weeks = state.weeks.filter(w => w.id !== id);
+  renderCalendar(); calculate(); autoSave();
+}
+function renderCalendar(){
+  const el = document.getElementById('calBody');
+  const n = parseInt(gv('numEmp'))||1;
+  if(!state.weeks.length){ el.innerHTML='<div class="empty">Adicione semanas ao calendário</div>'; return; }
+  el.innerHTML = state.weeks.map((w,i) => {
+    const adjH = Math.round(PROD[w.prod]*n*((5-(w.holidays||0))/5)*10)/10;
+    const hasHol = (w.holidays||0)>0;
+    return `<div class="cal-row">
+      <div class="wnum">${i+1}</div>
+      <div><input type="text" id="wn-${w.id}" value="${esc(w.name)}" placeholder="Descrição..."
+        oninput="syncAndCalc()" style="border-width:1.5px;padding:.28rem .5rem;font-size:.79rem"></div>
+      <div><select id="wp-${w.id}" class="psel ${w.prod}" onchange="weekProdChange(${w.id},this.value)">
+        <option value="pequeno" ${w.prod==='pequeno'?'selected':''}>🔴 Pequeno (5h)</option>
+        <option value="medio" ${w.prod==='medio'?'selected':''}>🟡 Médio (10h)</option>
+        <option value="alto" ${w.prod==='alto'?'selected':''}>🟢 Alto (15h)</option>
+        <option value="altissimo" ${w.prod==='altissimo'?'selected':''}>🔵 Altíssimo (20h)</option>
+      </select></div>
+      <div><input type="number" class="holiday-input" id="wh-${w.id}" value="${w.holidays||0}" min="0" max="4"
+        oninput="syncAndCalc()" title="Dias não trabalhados nesta semana (feriados, recessos)"></div>
+      <div class="whrs ${hasHol?'has-holiday':''}">${adjH}h${hasHol?' ⚠':''}</div>
+      <div><button class="btn btn-danger" onclick="removeWeek(${w.id})">✕</button></div>
+    </div>`;
+  }).join('');
+}
+function weekProdChange(id,val){
+  const w=state.weeks.find(x=>x.id===id); if(w) w.prod=val;
+  const el=document.getElementById('wp-'+id); if(el) el.className='psel '+val;
+  syncAndCalc();
+}
+function syncAndCalc(){ syncDOM(); renderCalendar(); calculate(); autoSave(); }
+
+// ─────────────────────────────────────────────
+// CUSTOS DIRETOS
+// ─────────────────────────────────────────────
+function addDirect(){ state.directCosts.push({id:Date.now(),name:'',value:0}); renderDirect(); autoSave(); }
+function removeDirect(id){ state.directCosts=state.directCosts.filter(c=>c.id!==id); renderDirect(); calculate(); autoSave(); }
+function renderDirect(){
+  const el = document.getElementById('directBody');
+  if(!state.directCosts.length){ el.innerHTML='<div class="empty" style="margin-bottom:.75rem">Nenhum custo direto adicionado</div>'; return; }
+  el.innerHTML = state.directCosts.map(c => `
+    <div class="cost-row">
+      <input type="text" id="cn-${c.id}" value="${esc(c.name)}" placeholder="Ex: Transporte, Impressões..." oninput="syncAndCalc()" style="font-size:.82rem">
+      <div class="cost-prefix"><input type="number" id="cv-${c.id}" value="${c.value||0}" min="0" step="0.01" oninput="syncAndCalc()" style="font-size:.82rem"></div>
+      <button class="btn btn-danger" onclick="removeDirect(${c.id})">✕</button>
+    </div>`).join('');
+}
+
+// ─────────────────────────────────────────────
+// CÁLCULO
+// ─────────────────────────────────────────────
+function calculate(){
+  syncDOM();
+  updateSettingsUI();
+
+  const n = state.numEmp, hr = settings.hourRate;
+  const profR = state.profitRate/100, issR = settings.issRate/100, dp = state.discPct/100;
+
+  // Horas (ajustadas por feriados)
+  let totalH = 0;
+  state.weeks.forEach(w => {
+    totalH += Math.round(PROD[w.prod]*n*((5-(w.holidays||0))/5)*10)/10;
+  });
+
+  // Dias trabalhados (para despesas indiretas)
+  let totalDays = 0;
+  state.weeks.forEach(w => { totalDays += (5-(w.holidays||0)); });
+
+  const labor    = totalH * hr;
+  const indirect = despesiaDia() * totalDays;
+  let   direct   = 0; state.directCosts.forEach(c => direct += c.value||0);
+
+  const subtotal = labor + indirect + direct;
+  const profit   = subtotal * profR;
+  const preISS   = subtotal + profit;
+  const iss      = preISS * issR;
+  const grand    = preISS + iss;
+  const discAmt  = grand * dp;
+  const final    = grand - discAmt;
+  const base     = dp > 0 ? final : grand;
+
+  // Stats equipe
+  setEl('stHours', totalH+'h');
+  setEl('stLabor', fmt(labor));
+
+  // Despesas Indiretas info box
+  setEl('indDespesiaDia', fmt(despesiaDia())+'/dia');
+  setEl('indDias', totalDays+' dia'+(totalDays!==1?'s':''));
+  setEl('indTotal', fmt(indirect));
+
+  // Breakdown preço
+  setEl('pMain', fmt(grand));
+  setEl('pName', state.projectName||'Projeto sem nome');
+  setEl('bdLabor', fmt(labor));
+  setEl('bdIndirect', fmt(indirect));
+  setEl('bdDirect', fmt(direct));
+  setEl('bdSub', fmt(subtotal));
+  document.getElementById('bdProfitLbl').textContent = 'Lucro ('+state.profitRate+'%)';
+  setEl('bdProfit', fmt(profit));
+  document.getElementById('bdISSLbl').textContent = 'ISS ('+settings.issRate+'%)';
+  setEl('bdISS', fmt(iss));
+  setEl('bdTotal', fmt(grand));
+
+  // Desconto
+  setEl('discVal', fmt(discAmt));
+  const fb = document.getElementById('finalBox');
+  fb.style.display = discAmt>0 ? 'block' : 'none';
+  if(discAmt>0) setEl('finalVal', fmt(final));
+
+  renderInstallments(base);
+  return {totalH, totalDays, labor, indirect, direct, subtotal, profit, iss, grand, discAmt, final, base};
+}
+
+// ─────────────────────────────────────────────
+// PARCELAMENTO COM JUROS
+// ─────────────────────────────────────────────
+function renderInstallments(total){
+  const r = (state.installRate||0)/100;
+  document.getElementById('instGrid').innerHTML = [2,3,4,6,10,12].map(n => {
+    const pmt = r===0 ? total/n : total*(r*Math.pow(1+r,n))/(Math.pow(1+r,n)-1);
+    const tot = pmt*n;
+    return `<div class="icard" onclick="selInst(this)">
+      <div class="inum">${n}x</div>
+      <div class="ilbl">parcelas de</div>
+      <div class="ival">${fmt(pmt)}</div>
+      ${r>0?'<div class="itot">Total: '+fmt(tot)+'</div>':''}
+    </div>`;
+  }).join('');
+}
+function selInst(el){ document.querySelectorAll('.icard').forEach(c=>c.classList.remove('active')); el.classList.add('active'); }
+
+// ─────────────────────────────────────────────
+// PROJETOS SALVOS
+// ─────────────────────────────────────────────
+function renderSaved(){
+  const all = lsGet('aj_proj',[]);
+  const el = document.getElementById('savedList');
+  if(!all.length){ el.innerHTML='<div class="empty">Nenhum projeto salvo ainda</div>'; return; }
+  el.innerHTML = all.slice().reverse().map(p => `
+    <div class="sp-item" onclick="loadProject('${esc(p.projectName)}')">
+      <div>
+        <div class="sp-name">${esc(p.projectName)}</div>
+        <div class="sp-meta">${esc((p.scopes||[]).join(', ')||'Sem escopo')} · ${p.weeks?p.weeks.length:0} sem. · ${p.savedAt||''}</div>
+      </div>
+      <button class="btn btn-danger" style="padding:.28rem .5rem;font-size:.72rem;flex-shrink:0"
+        onclick="deleteProject('${esc(p.projectName)}',event)">✕</button>
+    </div>`).join('');
+}
+
+// ─────────────────────────────────────────────
+// EXPORTAR CSV
+// ─────────────────────────────────────────────
+function exportCSV(){
+  syncDOM();
+  const R = calculate();
+  const dd = despesiaDia();
+  const rows=[
+    ['PRECIFICAÇÃO AÇÃO JÚNIOR'],[''],
+    ['CONFIGURAÇÕES DA EMPRESA'],
+    ['Valor Hora Consultoria (R$):', settings.hourRate],
+    ['ISS (%):', settings.issRate],
+    ['Planejamento Orçamentário (R$):', settings.orcamento],
+    ['Dias Médio por Consultoria:', settings.diasMedio],
+    ['Meta de Consultorias/Ano:', settings.metaConsultorias],
+    ['Despesa/Dia de Consultoria (R$):', dd.toFixed(2)],
+    [''],
+    ['PROJETO'],
+    ['Nome:', state.projectName||'—'],
+    ['Escopo:', (state.scopes||[]).join(' + ')||'—'],
+    ['Consultores:', state.numEmp],
+    ['Taxa de Lucro (%):', state.profitRate],
+    [''],
+    ['CALENDÁRIO'],['Semana','Descrição','Rendimento','Feriados','Horas Equipe','Dias Trabalhados'],
+  ];
+  state.weeks.forEach((w,i)=>{
+    const adjH=Math.round(PROD[w.prod]*state.numEmp*((5-(w.holidays||0))/5)*10)/10;
+    rows.push([i+1,w.name,w.prod,w.holidays||0,adjH,(5-(w.holidays||0))]);
+  });
+  rows.push(['','','','TOTAL HORAS:',R.totalH,'TOTAL DIAS:',R.totalDays]);
+  rows.push(['']);
+  rows.push(['CUSTOS DIRETOS'],['Descrição','Valor']);
+  state.directCosts.forEach(c=>rows.push([c.name,c.value]));
+  rows.push(['']);
+  rows.push(['PRECIFICAÇÃO']);
+  rows.push(['Mão de Obra',R.labor.toFixed(2)]);
+  rows.push(['Despesas Indiretas ('+R.totalDays+' dias × R$ '+dd.toFixed(2)+')',R.indirect.toFixed(2)]);
+  rows.push(['Custos Diretos',R.direct.toFixed(2)]);
+  rows.push(['Subtotal',R.subtotal.toFixed(2)]);
+  rows.push(['Lucro ('+state.profitRate+'%)',R.profit.toFixed(2)]);
+  rows.push(['ISS ('+settings.issRate+'%)',R.iss.toFixed(2)]);
+  rows.push(['TOTAL À VISTA',R.grand.toFixed(2)]);
+  if(R.discAmt>0){ rows.push(['Desconto ('+state.discPct+'%)',-R.discAmt.toFixed(2)]); rows.push(['PREÇO FINAL C/ DESCONTO',R.final.toFixed(2)]); }
+  rows.push(['']);
+  rows.push(['PARCELAMENTO (juros '+state.installRate+'% a.m.)'],['Parcelas','Valor Parcela','Total Pago']);
+  const r2=(state.installRate||0)/100;
+  [2,3,4,6,10,12].forEach(n=>{
+    const pmt=r2===0?R.base/n:R.base*(r2*Math.pow(1+r2,n))/(Math.pow(1+r2,n)-1);
+    rows.push([n+'x',pmt.toFixed(2),(pmt*n).toFixed(2)]);
+  });
+  const csv=rows.map(r=>(Array.isArray(r)?r:[r]).map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download='Precificacao_'+(state.projectName||'Projeto').replace(/\s+/g,'_')+'.csv';
+  a.click();
+  toast('📊 Planilha exportada!');
+}
+
+// ─────────────────────────────────────────────
+// PDF
+// ─────────────────────────────────────────────
+function generatePDF(){
+  syncDOM();
+  const R = calculate();
+  const dd = despesiaDia();
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF('p','mm','a4');
+  const W=210,M=18,CW=W-M*2; let y=0;
+
+  doc.setFillColor(30,58,138);doc.rect(0,0,W,52,'F');
+  doc.setFillColor(245,158,11);doc.rect(0,50,W,3,'F');
+  doc.setFillColor(245,158,11);doc.roundedRect(M,9,20,20,3,3,'F');
+  doc.setTextColor(255,255,255);doc.setFontSize(10);doc.setFont('helvetica','bold');
+  doc.text('AJ',M+10,21,{align:'center'});
+  doc.setFontSize(20);doc.text('AÇÃO JÚNIOR',M+26,19);
+  doc.setFontSize(9.5);doc.setFont('helvetica','normal');doc.text('Precificação de Projeto',M+26,27);
+  doc.setFontSize(8.5);
+  doc.text('Data: '+new Date().toLocaleDateString('pt-BR'),W-M,14,{align:'right'});
+  doc.text('Proposta Nº '+String(Date.now()).slice(-6),W-M,21,{align:'right'});
+  const scopeStr=(state.scopes||[]).join(' + ')||'—';
+  doc.text(scopeStr.length>38?scopeStr.slice(0,38)+'…':scopeStr,W-M,28,{align:'right'});
+  y=63;
+
+  pdfSec(doc,'INFORMAÇÕES DO PROJETO',M,y,CW);y+=10;
+  const info=[
+    ['Projeto:',state.projectName||'—'],['Escopo:',scopeStr],
+    ['Consultores:',String(state.numEmp)],['Valor Hora:',fmt(settings.hourRate)+'/h'],
+    ['Semanas:',String(state.weeks.length)],['Horas produtivas:',R.totalH+'h'],
+    ['Dias trabalhados:',R.totalDays+' dias'],['Taxa de Lucro:',state.profitRate+'%'],
+    ['ISS:',settings.issRate+'% (LC 116/2003)'],
+  ];
+  doc.setFontSize(9.5);
+  info.forEach(([l,v])=>{
+    doc.setFont('helvetica','bold');doc.setTextColor(60,60,60);doc.text(l,M+3,y);
+    doc.setFont('helvetica','normal');doc.setTextColor(20,20,20);doc.text(v,M+58,y);y+=6.5;
+  });y+=5;
+
+  if(state.weeks.length){
+    if(y>215){doc.addPage();y=20;}
+    pdfSec(doc,'CALENDÁRIO DO PROJETO',M,y,CW);y+=10;
+    doc.setFillColor(232,240,252);doc.rect(M,y-5.5,CW,9,'F');
+    doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);doc.setFontSize(8.5);
+    doc.text('#',M+3,y);doc.text('Descrição',M+12,y);doc.text('Rendimento',M+93,y);doc.text('Fer.',M+136,y);doc.text('Horas',M+150,y);y+=5;
+    const pl={pequeno:'Pequeno (5h)',medio:'Médio (10h)',alto:'Alto (15h)',altissimo:'Altíssimo (20h)'};
+    doc.setFont('helvetica','normal');doc.setTextColor(35,35,35);doc.setFontSize(9);
+    state.weeks.forEach((w,i)=>{
+      if(y>270){doc.addPage();y=20;}
+      if(i%2===0){doc.setFillColor(248,251,255);doc.rect(M,y-5,CW,7.5,'F');}
+      const adjH=Math.round(PROD[w.prod]*state.numEmp*((5-(w.holidays||0))/5)*10)/10;
+      doc.text(String(i+1),M+4,y);doc.text(w.name||'Sem. '+(i+1),M+12,y);
+      doc.text(pl[w.prod]||w.prod,M+93,y);doc.text(String(w.holidays||0),M+138,y);doc.text(adjH+'h',M+150,y);y+=7.5;
+    });y+=6;
+  }
+
+  if(state.directCosts.length){
+    if(y>215){doc.addPage();y=20;}
+    pdfSec(doc,'CUSTOS DIRETOS',M,y,CW);y+=10;
+    doc.setFillColor(232,240,252);doc.rect(M,y-5.5,CW,9,'F');
+    doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);doc.setFontSize(8.5);
+    doc.text('Descrição',M+3,y);doc.text('Valor',W-M-3,y,{align:'right'});y+=5;
+    doc.setFont('helvetica','normal');doc.setTextColor(35,35,35);doc.setFontSize(9);
+    state.directCosts.forEach((c,i)=>{
+      if(i%2===0){doc.setFillColor(248,251,255);doc.rect(M,y-5,CW,7.5,'F');}
+      doc.text(c.name||'—',M+3,y);doc.text(fmt(c.value),W-M-3,y,{align:'right'});y+=7.5;
+    });y+=6;
+  }
+
+  if(y>190){doc.addPage();y=20;}
+  pdfSec(doc,'PRECIFICAÇÃO DO PROJETO',M,y,CW);y+=11;
+  const pRows=[
+    ['Mão de Obra ('+R.totalH+'h × '+fmt(settings.hourRate)+')',fmt(R.labor)],
+    ['Despesas Indiretas ('+R.totalDays+' dias × '+fmt(dd)+')',fmt(R.indirect)],
+    ['Custos Diretos',fmt(R.direct)],
+    ['Subtotal (Custo Total)',fmt(R.subtotal)],
+    ['Lucro ('+state.profitRate+'%)',fmt(R.profit)],
+    ['ISS ('+settings.issRate+'%)',fmt(R.iss)],
+  ];
+  doc.setFontSize(10);
+  pRows.forEach(([l,v])=>{
+    doc.setFont('helvetica','normal');doc.setTextColor(65,65,65);
+    doc.text(l,M+5,y);doc.text(v,W-M-3,y,{align:'right'});y+=7.5;
+  });
+  y+=2;
+  doc.setFillColor(30,58,138);doc.rect(M,y-5,CW,14,'F');
+  doc.setTextColor(245,158,11);doc.setFont('helvetica','bold');doc.setFontSize(13);
+  doc.text('TOTAL À VISTA',M+6,y+4);doc.text(fmt(R.grand),W-M-3,y+4,{align:'right'});y+=19;
+
+  if(R.discAmt>0){
+    doc.setFont('helvetica','normal');doc.setTextColor(80,80,80);doc.setFontSize(10);
+    doc.text('Desconto ('+state.discPct+'%): - '+fmt(R.discAmt),M+5,y);y+=9;
+    doc.setFillColor(16,185,129);doc.rect(M,y-5,CW,14,'F');
+    doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(12);
+    doc.text('VALOR FINAL COM DESCONTO',M+6,y+4);doc.text(fmt(R.final),W-M-3,y+4,{align:'right'});y+=19;
+  }
+
+  if(y>228){doc.addPage();y=20;}y+=4;
+  doc.setTextColor(30,58,138);doc.setFont('helvetica','bold');doc.setFontSize(11);
+  doc.text('OPÇÕES DE PARCELAMENTO'+(state.installRate>0?' ('+state.installRate+'% a.m.)':''),M,y);y+=9;
+  const rp=(state.installRate||0)/100;
+  doc.setFontSize(9);let col=0;
+  [2,3,4,6,10,12].forEach((n,i)=>{
+    const pmt=rp===0?R.base/n:R.base*(rp*Math.pow(1+rp,n))/(Math.pow(1+rp,n)-1);
+    const xp=M+(col*59),ry=y+(Math.floor(i/3)*18);
+    doc.setFillColor(238,244,252);doc.rect(xp,ry-6,57,rp>0?16:13,'F');
+    doc.setDrawColor(190,210,240);doc.rect(xp,ry-6,57,rp>0?16:13);
+    doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);doc.text(n+'x',xp+5,ry+1);
+    doc.setFont('helvetica','normal');doc.setTextColor(40,40,40);doc.text('de '+fmt(pmt),xp+17,ry+1);
+    if(rp>0){doc.setFontSize(7.5);doc.setTextColor(100,100,100);doc.text('Total: '+fmt(pmt*n),xp+5,ry+7);doc.setFontSize(9);}
+    col++;if(col>=3)col=0;
+  });
+
+  const pH=doc.internal.pageSize.height;
+  doc.setFillColor(245,158,11);doc.rect(0,pH-22,W,2,'F');
+  doc.setFillColor(30,58,138);doc.rect(0,pH-20,W,20,'F');
+  doc.setTextColor(255,255,255);doc.setFontSize(8);doc.setFont('helvetica','normal');
+  doc.text('Ação Júnior — Sistema de Precificação de Projetos',M,pH-11);
+  doc.text('Gerado em '+new Date().toLocaleDateString('pt-BR')+' às '+new Date().toLocaleTimeString('pt-BR'),W-M,pH-11,{align:'right'});
+
+  doc.save('Precificacao_'+(state.projectName||'Projeto').replace(/\s+/g,'_')+'_'+new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')+'.pdf');
+  toast('📄 PDF gerado com sucesso!');
+}
+
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
+function pdfSec(doc,txt,x,y,w){
+  doc.setTextColor(30,58,138);doc.setFontSize(12);doc.setFont('helvetica','bold');
+  doc.text(txt,x,y);doc.setDrawColor(30,58,138);doc.setLineWidth(.4);doc.line(x,y+2,x+w,y+2);
+}
+function fmt(v){ return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0); }
+function esc(s){ return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''; }
+function gv(id){ return document.getElementById(id)?.value||''; }
+function setField(id,v){ const el=document.getElementById(id); if(el) el.value=v; }
+function setEl(id,v){ const el=document.getElementById(id); if(el) el.textContent=v; }
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3200); }
+function ls(k,d){ localStorage.setItem(k,JSON.stringify(d)); }
+function lsGet(k,def){ try{const r=localStorage.getItem(k);return r?JSON.parse(r):def;}catch{return def;} }
+</script>
+</body>
+</html>
